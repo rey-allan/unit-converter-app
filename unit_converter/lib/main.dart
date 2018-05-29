@@ -8,11 +8,7 @@ import 'package:flutter/material.dart';
 // You can use a relative import, i.e. `import 'category.dart;'` or
 // a package import, as shown below.
 // More details at http://dart-lang.github.io/linter/lints/avoid_relative_lib_imports.html
-import 'package:unit_converter/widgets//category.dart';
-
-const _categoryName = 'Cake';
-const _categoryIcon = Icons.cake;
-const _categoryColor = Colors.green;
+import 'package:unit_converter/screens/category_screen.dart';
 
 /// The function that is called when main.dart is run.
 void main() {
@@ -20,24 +16,15 @@ void main() {
 }
 
 /// This widget is the root of our application.
-/// Currently, we just show one widget in our app.
+///
+/// The first screen we see is a list of [Category].
 class UnitConverterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Unit Converter',
-      home: Scaffold(
-        backgroundColor: Colors.green[100],
-        body: Center(
-          child: Category(
-              icon: _categoryIcon,
-              color: _categoryColor,
-              text: _categoryName,
-              onTapHandler: () => print('I was tapped!'),
-          ),
-        ),
-      ),
+      home: CategoryScreen(),
     );
   }
 }
