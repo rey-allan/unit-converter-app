@@ -10,7 +10,7 @@ import 'package:unit_converter/model/unit.dart';
 /// Converter screen where users can input amounts to convert.
 ///
 /// Currently, it just displays a list of mock units.
-class ConverterScreen extends StatelessWidget {
+class ConverterScreen extends StatefulWidget {
   final String name;
   final ColorSwatch color;
   final List<Unit> units;
@@ -25,13 +25,18 @@ class ConverterScreen extends StatelessWidget {
        assert(units != null);
 
   @override
+  State<StatefulWidget> createState() => _ConverterScreenState();
+}
+
+class _ConverterScreenState extends State<ConverterScreen> {
+  @override
   Widget build(BuildContext context) {
     // Here is just a placeholder for a list of mock units
-    final List<Widget> unitWidgets = units.map((Unit unit) {
+    final List<Widget> unitWidgets = widget.units.map((Unit unit) {
       return Container(
         margin: EdgeInsets.all(8.0),
         padding: EdgeInsets.all(16.0),
-        color: this.color,
+        color: widget.color,
         child: Column(
           children: <Widget>[
             Text(
@@ -50,13 +55,13 @@ class ConverterScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          this.name,
+          widget.name,
           style: TextStyle(
             fontSize: 30.0,
             color: Colors.black,
           ),
         ),
-        backgroundColor: this.color,
+        backgroundColor: widget.color,
         centerTitle: true,
       ),
       body: ListView(

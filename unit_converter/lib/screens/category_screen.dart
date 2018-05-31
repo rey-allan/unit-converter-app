@@ -10,9 +10,14 @@ import 'package:unit_converter/widgets/category.dart';
 ///
 /// This is the 'home' screen of the Unit Converter.
 /// It shows a header and a list of [Category].
-class CategoryScreen extends StatelessWidget {
+class CategoryScreen extends StatefulWidget {
   const CategoryScreen();
 
+  @override
+  State<StatefulWidget> createState() => _CategoryScreenState();
+}
+
+class _CategoryScreenState extends State<CategoryScreen> {
   static const _categoryNames = <String>[
     'Length',
     'Area',
@@ -35,13 +40,14 @@ class CategoryScreen extends StatelessWidget {
     Colors.red,
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    // Build a list of `Category` widgets to use in a `ListView`
-    final List<Widget> categories = <Widget>[];
+  // Build a list of `Category` widgets to use in a `ListView`
+  final List<Widget> _categories = <Widget>[];
 
+  @override
+  void initState() {
+    // Create the list of categories at initialization
     for (int i = 0; i < _categoryNames.length; i++) {
-      categories.add(
+      _categories.add(
           Category(
             icon: Icons.cake,
             color: _baseColors[i],
@@ -50,8 +56,13 @@ class CategoryScreen extends StatelessWidget {
       );
     }
 
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final listView = ListView(
-      children: categories,
+      children: _categories,
       padding: EdgeInsets.all(8.0),
     );
 
