@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import 'package:unit_converter/widgets/category.dart';
 
 /// Category Screen
@@ -45,7 +46,6 @@ class CategoryScreen extends StatelessWidget {
             icon: Icons.cake,
             color: _baseColors[i],
             text: _categoryNames[i],
-            onTapHandler: () => print('I was tapped!'),
           )
       );
     }

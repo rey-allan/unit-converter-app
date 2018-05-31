@@ -7,6 +7,9 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import 'package:unit_converter/model/unit.dart';
+import 'package:unit_converter/screens/converter_screen.dart';
+
 /// A custom [Category] widget.
 ///
 /// The widget is composed of an [Icon] and [Text]. Tapping on the widget shows
@@ -25,11 +28,35 @@ class Category extends StatelessWidget {
     @required this.icon,
     @required this.color,
     @required this.text,
-    @required this.onTapHandler
+    this.onTapHandler
   }) : assert(icon != null),
        assert(color != null),
-       assert(text != null),
-       assert(onTapHandler != null);
+       assert(text != null);
+
+  /// Navigates to the [ConverterScreen] acting as a default `onTap` handler.
+  void _navigateToConverter(BuildContext context) {
+    Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) {
+        return new ConverterScreen(
+            name: this.text,
+            color: this.color,
+            units: this._generateUnits(),
+        );
+      }),
+    );
+  }
+
+  /// Generates a list of mock [Unit]s.
+  List<Unit> _generateUnits() {
+    return List.generate(10, (int i ) {
+      i += 1;
+      return Unit(
+        name: '${this.text} Unit $i',
+        conversion: i.toDouble(),
+      );
+    });
+  }
 
   /// Builds a custom widget that shows [Category] information.
   ///
@@ -46,7 +73,8 @@ class Category extends StatelessWidget {
         highlightColor: this.color,
         splashColor: this.color,
         borderRadius: BorderRadius.all(Radius.circular(50.0)),
-        onTap: this.onTapHandler,
+        onTap: null != this.onTapHandler ? this.onTapHandler :
+               () => this._navigateToConverter(context),
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(8.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:unit_converter/screens/converter_screen.dart';
 import 'package:unit_converter/widgets/category.dart';
 
 void main() {
@@ -52,5 +53,30 @@ void main() {
     await tester.pump();
 
     expect(wasTapped, isTrue);
+  });
+
+  testWidgets('Navigates to the ConverterScreen when tapped',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Category(
+            icon: Icons.computer,
+            color: Colors.blueAccent,
+            text: 'Degrees',
+          )
+        )
+      )
+    );
+
+    // Initially the ConverterScreen should not be present
+    expect(find.byType(ConverterScreen), findsNothing);
+
+    // Tap and wait until all animations are done
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+
+    // After tapping, the app should now be at the ConverterScreen
+    expect(find.byType(ConverterScreen), findsOneWidget);
   });
 }
