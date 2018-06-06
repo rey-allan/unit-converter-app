@@ -11,7 +11,10 @@ void main() {
             home: Material(
               child: Category(
                   icon: Icons.computer,
-                  color: Colors.blueAccent,
+                  color: ColorSwatch(Colors.blueAccent.value, {
+                    'highlight': Colors.blueAccent,
+                    'splash': Colors.blue,
+                  }),
                   text: 'Degrees',
                   onTapHandler: () => print('I was tapped!'),
               ),
@@ -27,7 +30,7 @@ void main() {
     expect(text.data, equals('Degrees'));
 
     final InkWell inkWell = tester.widget(find.byType(InkWell));
-    expect(inkWell.splashColor, equals(Colors.blueAccent));
+    expect(inkWell.splashColor, equals(Colors.blue));
     expect(inkWell.highlightColor, equals(Colors.blueAccent));
   });
 
@@ -39,7 +42,10 @@ void main() {
             home: Material(
                 child: Category(
                   icon: Icons.computer,
-                  color: Colors.blueAccent,
+                  color: ColorSwatch(Colors.blueAccent.value, {
+                    'highlight': Colors.blueAccent,
+                    'splash': Colors.blue,
+                  }),
                   text: 'Degrees',
                   onTapHandler: () => wasTapped = !wasTapped,
                 ),
@@ -62,7 +68,10 @@ void main() {
         home: Material(
           child: Category(
             icon: Icons.computer,
-            color: Colors.blueAccent,
+            color: ColorSwatch(Colors.blueAccent.value, {
+              'highlight': Colors.blueAccent,
+              'splash': Colors.blue,
+            }),
             text: 'Degrees',
           )
         )

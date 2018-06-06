@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'package:unit_converter/model/unit.dart';
+import 'package:unit_converter/widgets/converter/dropdown.dart';
+import 'package:unit_converter/widgets/converter/numeric_input.dart';
+import 'package:unit_converter/widgets/converter/numeric_output.dart';
 
 /// Converter screen where users can input amounts to convert.
-///
-/// Currently, it just displays a list of mock units.
 class ConverterScreen extends StatefulWidget {
   final String name;
   final ColorSwatch color;
@@ -29,44 +30,134 @@ class ConverterScreen extends StatefulWidget {
 }
 
 class _ConverterScreenState extends State<ConverterScreen> {
+  double _inputValue;
+  double _outputValue;
+  double _toConversion;
+  double _fromConversion;
+
+  void _updateConversion() {
+    setState(() {
+      this._outputValue =
+          this._inputValue * (this._toConversion / this._fromConversion);
+    });
+  }
+
+  void _handleOnInputValueChange(double inputValue) {
+    setState(() {
+      this._inputValue = inputValue;
+      this._updateConversion();
+    });
+  }
+
+  void _handleOnFromConversionValueChange(double fromConversion) {
+    setState(() {
+      this._fromConversion = fromConversion;
+      this._updateConversion();
+    });
+  }
+
+  void _handleOnToConversionValueChange(double toConversion) {
+    setState(() {
+      this._toConversion = toConversion;
+      this._updateConversion();
+    });
+  }
+
+  Widget _buildVerticallyCenteredGroup(List<Widget> components) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: components,
+      )
+    );
+  }
+
+  Widget _buildInputGroup() {
+    return this._buildVerticallyCenteredGroup(
+        <Widget>[
+          NumericInput(
+            label: 'Input',
+            onChangeHandler: (value) => this._handleOnInputValueChange(value),
+          ),
+          // Add some padding to create space between components
+          Padding(
+            padding: EdgeInsets.only(top: 16.0),
+          ),
+          Dropdown(
+            units: widget.units,
+            onChangeHandler: (value) =>
+                this._handleOnFromConversionValueChange(value),
+          ),
+        ]
+    );
+  }
+
+  Widget _buildOutputGroup() {
+    return this._buildVerticallyCenteredGroup(
+        <Widget>[
+          NumericOutput(
+            label: 'Output',
+            value: this._outputValue,
+          ),
+          // Add some padding to create space between components
+          Padding(
+            padding: EdgeInsets.only(top: 16.0),
+          ),
+          Dropdown(
+            units: widget.units,
+            onChangeHandler: (value) =>
+                this._handleOnToConversionValueChange(value),
+          ),
+        ]
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    this._fromConversion = widget.units[0].conversion;
+    this._toConversion = widget.units[0].conversion;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Here is just a placeholder for a list of mock units
-    final List<Widget> unitWidgets = widget.units.map((Unit unit) {
-      return Container(
-        margin: EdgeInsets.all(8.0),
-        padding: EdgeInsets.all(16.0),
-        color: widget.color,
-        child: Column(
-          children: <Widget>[
-            Text(
-              unit.name,
-              style: Theme.of(context).textTheme.headline,
-            ),
-            Text(
-              'Conversion: ${unit.conversion}',
-              style: Theme.of(context).textTheme.subhead,
-            ),
-          ],
-        ),
-      );
-    }).toList();
+    final Widget inputGroup = this._buildInputGroup();
+    final Widget outputGroup = this._buildOutputGroup();
+    final Widget conversionArrows = RotatedBox(
+      quarterTurns: 1,
+      child: Icon(
+        Icons.compare_arrows,
+        size: 40.0,
+      ),
+    );
+
+    final Widget converterGroup = Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          inputGroup,
+          conversionArrows,
+          outputGroup,
+        ],
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.name,
-          style: TextStyle(
-            fontSize: 30.0,
-            color: Colors.black,
-          ),
+          style: Theme.of(context).textTheme.display1,
         ),
         backgroundColor: widget.color,
         centerTitle: true,
       ),
-      body: ListView(
-        children: unitWidgets,
-      ),
+      body: converterGroup,
+      // This prevents resizing the screen when the keyboard is opened
+      resizeToAvoidBottomPadding: false,
     );
   }
 }

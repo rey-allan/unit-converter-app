@@ -16,7 +16,7 @@ import 'package:unit_converter/screens/converter_screen.dart';
 /// a colored [InkWell] animation.
 class Category extends StatelessWidget {
   final IconData icon;
-  final Color color;
+  final ColorSwatch color;
   final String text;
   final GestureTapCallback onTapHandler;
 
@@ -70,8 +70,8 @@ class Category extends StatelessWidget {
     return Container(
       height: 100.0,
       child: InkWell(
-        highlightColor: this.color,
-        splashColor: this.color,
+        highlightColor: this.color['highlight'],
+        splashColor: this.color['splash'],
         borderRadius: BorderRadius.all(Radius.circular(50.0)),
         onTap: null != this.onTapHandler ? this.onTapHandler :
                () => this._navigateToConverter(context),
