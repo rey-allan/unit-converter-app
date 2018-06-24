@@ -44,6 +44,7 @@ class NumericOutput extends StatelessWidget {
     return InputDecorator(
       child: Text(
         this._formatValue(),
+        key: Key('driver-numeric-output'),
         style: Theme.of(context).textTheme.display1,
       ),
       decoration: InputDecoration(

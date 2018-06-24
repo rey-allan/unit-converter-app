@@ -86,6 +86,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
             padding: EdgeInsets.only(top: 16.0),
           ),
           Dropdown(
+            key: Key('driver-from-dropdown'),
             units: widget.units,
             onChangeHandler: (value) =>
                 this._handleOnFromConversionValueChange(value),
@@ -106,6 +107,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
             padding: EdgeInsets.only(top: 16.0),
           ),
           Dropdown(
+            key: Key('driver-to-dropdown'),
             units: widget.units,
             onChangeHandler: (value) =>
                 this._handleOnToConversionValueChange(value),

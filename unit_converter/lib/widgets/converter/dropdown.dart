@@ -8,10 +8,12 @@ class Dropdown extends StatefulWidget {
   final ValueChanged<double> onChangeHandler;
 
   const Dropdown({
+    Key key,
     @required this.units,
     @required this.onChangeHandler
   }) : assert(units != null),
-       assert(onChangeHandler != null);
+       assert(onChangeHandler != null),
+       super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DropdownState();
