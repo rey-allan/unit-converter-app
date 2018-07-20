@@ -7,56 +7,25 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'package:unit_converter/model/unit.dart';
-import 'package:unit_converter/screens/converter_screen.dart';
+import 'package:unit_converter/model/category.dart';
 
-/// A custom [Category] widget.
+/// A custom [CategoryTile] widget to display a [Category] instance,
 ///
 /// The widget is composed of an [Icon] and [Text]. Tapping on the widget shows
 /// a colored [InkWell] animation.
-class Category extends StatelessWidget {
-  final IconData icon;
-  final ColorSwatch color;
-  final String text;
-  final GestureTapCallback onTapHandler;
+class CategoryTile extends StatelessWidget {
+  final Category category;
+  final ValueChanged<Category> onTapHandler;
 
-  /// Creates a [Category].
+  /// Creates a [CategoryTile].
   ///
-  /// A [Category] saves the name of the Category (e.g. 'Length'), its color for
-  /// the UI, and the icon that represents it (e.g. a ruler).
-  const Category({
-    @required this.icon,
-    @required this.color,
-    @required this.text,
-    this.onTapHandler
-  }) : assert(icon != null),
-       assert(color != null),
-       assert(text != null);
-
-  /// Navigates to the [ConverterScreen] acting as a default `onTap` handler.
-  void _navigateToConverter(BuildContext context) {
-    Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) {
-        return new ConverterScreen(
-            name: this.text,
-            color: this.color,
-            units: this._generateUnits(),
-        );
-      }),
-    );
-  }
-
-  /// Generates a list of mock [Unit]s.
-  List<Unit> _generateUnits() {
-    return List.generate(10, (int i ) {
-      i += 1;
-      return Unit(
-        name: '${this.text} Unit $i',
-        conversion: i.toDouble(),
-      );
-    });
-  }
+  /// A [CategoryTile] saves the name of the [Category] (e.g. 'Length'), its
+  /// color for the UI, and the icon that represents it (e.g. a ruler).
+  const CategoryTile({
+    @required this.category,
+    @required this.onTapHandler
+  }) : assert(category != null),
+       assert(onTapHandler != null);
 
   /// Builds a custom widget that shows [Category] information.
   ///
@@ -70,11 +39,10 @@ class Category extends StatelessWidget {
     return Container(
       height: 100.0,
       child: InkWell(
-        highlightColor: this.color['highlight'],
-        splashColor: this.color['splash'],
+        highlightColor: this.category.color['highlight'],
+        splashColor: this.category.color['splash'],
         borderRadius: BorderRadius.all(Radius.circular(50.0)),
-        onTap: null != this.onTapHandler ? this.onTapHandler :
-               () => this._navigateToConverter(context),
+        onTap: () => this.onTapHandler(this.category),
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(8.0),
@@ -83,12 +51,12 @@ class Category extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Icon(
-                    this.icon,
+                    this.category.iconLocation,
                     size: 60.0,
                   ),
                 ),
                 Text(
-                  this.text,
+                  this.category.name,
                   style: TextStyle(fontSize: 24.0),
                 ),
               ],

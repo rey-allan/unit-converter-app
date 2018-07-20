@@ -11,11 +11,6 @@ void main() {
     driver = await FlutterDriver.connect();
   });
 
-  setUp(() async {
-    // Make sure the user is on the main screen
-    await driver.waitFor(find.byType('CategoryScreen'));
-  });
-
   tearDownAll(() async {
     if (driver != null) {
       // Closes the connection
@@ -23,17 +18,12 @@ void main() {
     }
   });
 
-  tearDown(() async {
-    // Be sure to return to the main screen
-    await driver.tap(find.byType('BackButton'));
+  test('Unit Converter is displayed on start', () async {
+    await driver.waitFor(find.byType('ConverterScreen'));
   });
 
   test('User can select a category by tapping', () async {
-    await driver.tap(find.text('Mass'));
-
-    // User should have navigated to the [ConverterScreen] with title 'Mass'
-    await driver.waitFor(find.byType('ConverterScreen'));
-    await driver.waitFor(find.text('Mass'));
+    await _selectCategory(driver, 'Mass');
   });
 
   test('User can convert a number by entering it as input', () async {
@@ -46,30 +36,33 @@ void main() {
 
   test('User can change the "From" conversion unit', () async {
     await _selectCategory(driver, 'Area');
-    await _enterNumber(driver, 24.0);
+    await _enterNumber(driver, 34.0);
 
     await driver.tap(find.byValueKey('driver-from-dropdown'));
     await driver.tap(find.text('Area Unit 2'));
 
     // The conversion happens from 'Unit 2' to 'Unit 1', so the value is halved
-    await _validateOutputEquals(driver, '12');
+    await _validateOutputEquals(driver, '17');
   });
 
   test('User can change the "To" conversion unit', () async {
     await _selectCategory(driver, 'Volume');
-    await _enterNumber(driver, 24.0);
+    await _enterNumber(driver, 10.0);
 
     await driver.tap(find.byValueKey('driver-to-dropdown'));
     await driver.tap(find.text('Volume Unit 3'));
 
     // The conversion happens from 'Unit 1' to 'Unit 3', so the value is tripled
-    await _validateOutputEquals(driver, '72');
+    await _validateOutputEquals(driver, '30');
   });
 }
 
 Future<Null> _selectCategory(FlutterDriver driver, String category) async {
+  // Make sure to close the front panel
+  await driver.tap(find.byType("IconButton"));
+  // Now, tap the `category`
   await driver.tap(find.text(category));
-  // Make sure the user has navigated to the converter screen
+  // Make sure the user has navigated to the [ConverterScreen]
   await driver.waitFor(find.byType('ConverterScreen'));
 }
 

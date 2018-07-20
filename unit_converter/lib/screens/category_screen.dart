@@ -4,7 +4,11 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:unit_converter/widgets/category.dart';
+import 'package:unit_converter/model/category.dart';
+import 'package:unit_converter/model/unit.dart';
+import 'package:unit_converter/screens/converter_screen.dart';
+import 'package:unit_converter/widgets/backdrop.dart';
+import 'package:unit_converter/widgets/category_tile.dart';
 
 /// Category Screen
 ///
@@ -66,46 +70,71 @@ class _CategoryScreenState extends State<CategoryScreen> {
   ];
 
   // Build a list of `Category` widgets to use in a `ListView`
-  final List<Widget> _categories = <Widget>[];
+  final List<CategoryTile> _categories = <CategoryTile>[];
+
+  // Keep track of a currently selected [Category]
+  Category _currentCategory;
+
+  /// Generates a list of mock [Unit]s.
+  List<Unit> _generateUnits(String categoryName) {
+    return List.generate(10, (int i) {
+      i += 1;
+      return Unit(
+        name: '$categoryName Unit $i',
+        conversion: i.toDouble(),
+      );
+    });
+  }
+
+  /// Function to call when a [Category] is tapped
+  void _onCategoryTap(Category category) {
+    setState(() {
+      this._currentCategory = category;
+    });
+  }
 
   @override
   void initState() {
+    super.initState();
+
     // Create the list of categories at initialization
     for (int i = 0; i < _categoryNames.length; i++) {
       _categories.add(
-          Category(
-            icon: Icons.cake,
-            color: _baseColors[i],
-            text: _categoryNames[i],
+          CategoryTile(
+            category: Category(
+              name: _categoryNames[i],
+              color: _baseColors[i],
+              units: this._generateUnits(_categoryNames[i]),
+              iconLocation: Icons.cake,
+            ),
+            onTapHandler: this._onCategoryTap,
           )
       );
     }
 
-    super.initState();
+    // Set the default [Category] for the unit converter that opens
+    this._currentCategory = this._categories[0].category;
   }
 
   @override
   Widget build(BuildContext context) {
     final listView = ListView(
       children: _categories,
-      padding: EdgeInsets.all(8.0),
-    );
-
-    final appBar = AppBar(
-      title: Center(
-        child: Text(
-          'Unit Converter',
-          style: TextStyle(fontSize: 30.0, color: Colors.black),
-        ),
+      padding: EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        // The bottom padding for the back panel should be 48.0, to give it
+        // space for the bottom tab of the front panel of the [Backdrop]
+        bottom: 48.0,
       ),
-      elevation: 0.0,
-      backgroundColor: Colors.green[100],
     );
 
-    return Scaffold(
-      appBar: appBar,
-      body: listView,
-      backgroundColor: Colors.green[100],
+    return Backdrop(
+      currentCategory: this._currentCategory,
+      frontPanel: ConverterScreen(category: this._currentCategory),
+      backPanel: listView,
+      frontTitle: Text('Unit Converter'),
+      backTitle: Text('Select a Category'),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:unit_converter/model/category.dart';
 import 'package:unit_converter/model/unit.dart';
 import 'package:unit_converter/screens/converter_screen.dart';
 import 'package:unit_converter/widgets/converter/dropdown.dart';
@@ -17,10 +18,15 @@ void main() {
   testWidgets('Screen displays an input/output group with arrows',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: ConverterScreen(
-        name: 'Length',
-        color: Colors.blueAccent,
-        units: units,
+      home: Material(
+        child: ConverterScreen(
+          category: Category(
+            name: 'Length',
+            color: Colors.blueAccent,
+            units: units,
+            iconLocation: Icons.computer,
+          ),
+        ),
       ),
     ));
 
@@ -33,10 +39,15 @@ void main() {
   testWidgets('Input is converted when changed with default units',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: ConverterScreen(
-        name: 'Length',
-        color: Colors.blueAccent,
-        units: units,
+      home: Material(
+        child: ConverterScreen(
+          category: Category(
+            name: 'Length',
+            color: Colors.blueAccent,
+            units: units,
+            iconLocation: Icons.computer,
+          ),
+        ),
       ),
     ));
 
@@ -54,10 +65,15 @@ void main() {
   testWidgets('Input is converted when "From" unit is changed',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: ConverterScreen(
-        name: 'Length',
-        color: Colors.blueAccent,
-        units: units,
+      home: Material(
+        child: ConverterScreen(
+          category: Category(
+            name: 'Length',
+            color: Colors.blueAccent,
+            units: units,
+            iconLocation: Icons.computer,
+          ),
+        ),
       ),
     ));
 
@@ -83,10 +99,15 @@ void main() {
   testWidgets('Input is converted when "To" unit is changed',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: ConverterScreen(
-        name: 'Length',
-        color: Colors.blueAccent,
-        units: units,
+      home: Material(
+        child: ConverterScreen(
+          category: Category(
+            name: 'Length',
+            color: Colors.blueAccent,
+            units: units,
+            iconLocation: Icons.computer,
+          ),
+        ),
       ),
     ));
 

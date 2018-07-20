@@ -72,6 +72,18 @@ class _DropdownState extends State<Dropdown> {
   }
 
   @override
+  void didUpdateWidget(Dropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update the dropdown menu times when the units change, i.e. a new
+    // [Category] is selected
+    if (oldWidget.units != widget.units) {
+      this._createDropdownMenuItems();
+      this._setDefaultState();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(

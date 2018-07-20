@@ -5,25 +5,19 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'package:unit_converter/model/unit.dart';
+import 'package:unit_converter/model/category.dart';
 import 'package:unit_converter/widgets/converter/dropdown.dart';
 import 'package:unit_converter/widgets/converter/numeric_input.dart';
 import 'package:unit_converter/widgets/converter/numeric_output.dart';
 
 /// Converter screen where users can input amounts to convert.
 class ConverterScreen extends StatefulWidget {
-  final String name;
-  final ColorSwatch color;
-  final List<Unit> units;
+  final Category category;
 
-  /// This [ConverterScreen] requires the name, color, and units to not be null.
+  /// This [ConverterScreen] requires [Category] to not be null.
   const ConverterScreen({
-    @required this.name,
-    @required this.color,
-    @required this.units,
-  }) : assert(name != null),
-       assert(color != null),
-       assert(units != null);
+    @required this.category,
+  }) : assert(category != null);
 
   @override
   State<StatefulWidget> createState() => _ConverterScreenState();
@@ -35,7 +29,20 @@ class _ConverterScreenState extends State<ConverterScreen> {
   double _toConversion;
   double _fromConversion;
 
+  void _setDefaults() {
+    // Update the conversions, and trigger the computation of the output value
+    setState(() {
+      this._fromConversion = widget.category.units[0].conversion;
+      this._toConversion = widget.category.units[0].conversion;
+      this._updateConversion();
+    });
+  }
+
   void _updateConversion() {
+    if (null == this._inputValue) {
+      return;
+    }
+
     setState(() {
       this._outputValue =
           this._inputValue * (this._toConversion / this._fromConversion);
@@ -87,7 +94,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
           ),
           Dropdown(
             key: Key('driver-from-dropdown'),
-            units: widget.units,
+            units: widget.category.units,
             onChangeHandler: (value) =>
                 this._handleOnFromConversionValueChange(value),
           ),
@@ -108,7 +115,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
           ),
           Dropdown(
             key: Key('driver-to-dropdown'),
-            units: widget.units,
+            units: widget.category.units,
             onChangeHandler: (value) =>
                 this._handleOnToConversionValueChange(value),
           ),
@@ -119,9 +126,17 @@ class _ConverterScreenState extends State<ConverterScreen> {
   @override
   void initState() {
     super.initState();
+    this._setDefaults();
+  }
 
-    this._fromConversion = widget.units[0].conversion;
-    this._toConversion = widget.units[0].conversion;
+  @override
+  void didUpdateWidget(ConverterScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update the conversions when a new [Category] is selected
+    if (oldWidget.category != widget.category) {
+      this._setDefaults();
+    }
   }
 
   @override
@@ -148,18 +163,6 @@ class _ConverterScreenState extends State<ConverterScreen> {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.name,
-          style: Theme.of(context).textTheme.display1,
-        ),
-        backgroundColor: widget.color,
-        centerTitle: true,
-      ),
-      body: converterGroup,
-      // This prevents resizing the screen when the keyboard is opened
-      resizeToAvoidBottomPadding: false,
-    );
+    return converterGroup;
   }
 }
