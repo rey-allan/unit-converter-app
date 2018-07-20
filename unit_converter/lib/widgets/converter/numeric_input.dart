@@ -9,10 +9,12 @@ class NumericInput extends StatefulWidget {
   final ValueChanged<double> onChangeHandler;
 
   const NumericInput({
+    Key key,
     @required this.label,
     @required this.onChangeHandler
   }) : assert(label != null),
-       assert(onChangeHandler != null);
+       assert(onChangeHandler != null),
+       super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NumericInputState();

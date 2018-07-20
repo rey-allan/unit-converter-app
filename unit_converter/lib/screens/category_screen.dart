@@ -69,11 +69,27 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }),
   ];
 
-  // Build a list of `Category` widgets to use in a `ListView`
   final List<CategoryTile> _categories = <CategoryTile>[];
 
   // Keep track of a currently selected [Category]
   Category _currentCategory;
+
+  /// Makes the correct number of rows for the categories, based on whether the
+  /// device is portrait or landscape. For portrait, use a [ListView], and for
+  /// landscape, a [GridView].
+  Widget _buildCategoryWidgets(Orientation orientation) {
+    if (orientation == Orientation.portrait) {
+      return ListView(
+        children: this._categories,
+      );
+    } else {
+      return GridView.count(
+        crossAxisCount: 2,
+        childAspectRatio: 3.0,
+        children: this._categories,
+      );
+    }
+  }
 
   /// Generates a list of mock [Unit]s.
   List<Unit> _generateUnits(String categoryName) {
@@ -118,8 +134,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final listView = ListView(
-      children: _categories,
+    final categoriesView = Padding(
+      child: this._buildCategoryWidgets(MediaQuery.of(context).orientation),
       padding: EdgeInsets.only(
         left: 8.0,
         right: 8.0,
@@ -132,7 +148,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return Backdrop(
       currentCategory: this._currentCategory,
       frontPanel: ConverterScreen(category: this._currentCategory),
-      backPanel: listView,
+      backPanel: categoriesView,
       frontTitle: Text('Unit Converter'),
       backTitle: Text('Select a Category'),
     );

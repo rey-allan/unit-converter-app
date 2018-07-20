@@ -3,6 +3,13 @@ import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
+// There is currently no way to control the orientation of the device
+// programmatically, so no driver tests can be created to test the behavior
+// of changes between these two orientations, e.g. input values being persisted.
+// See: https://github.com/flutter/flutter/issues/10307
+// See: https://github.com/flutter/flutter/issues/6380
+// See: https://github.com/flutter/flutter/issues/6381
+
 void main() {
   FlutterDriver driver;
 

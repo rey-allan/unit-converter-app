@@ -24,6 +24,11 @@ class ConverterScreen extends StatefulWidget {
 }
 
 class _ConverterScreenState extends State<ConverterScreen> {
+  // Create a [GlobalKey] to persist changes to the input [TextField] when
+  // switching between orientation modes
+  // See: https://docs.flutter.io/flutter/widgets/GlobalKey-class.html
+  final GlobalKey _inputKey = GlobalKey(debugLabel: 'inputText');
+
   double _inputValue;
   double _outputValue;
   double _toConversion;
@@ -85,6 +90,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
     return this._buildVerticallyCenteredGroup(
         <Widget>[
           NumericInput(
+            key: this._inputKey,
             label: 'Input',
             onChangeHandler: (value) => this._handleOnInputValueChange(value),
           ),
@@ -151,16 +157,41 @@ class _ConverterScreenState extends State<ConverterScreen> {
       ),
     );
 
+    final Widget converter = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        inputGroup,
+        conversionArrows,
+        outputGroup
+      ],
+    );
+
     final Widget converterGroup = Padding(
       padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          inputGroup,
-          conversionArrows,
-          outputGroup,
-        ],
-      ),
+      child: OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+          if (orientation == Orientation.portrait) {
+            // Use a `SingleChildScrollView` to ensure the converter is
+            // viewable on all screens and is scrollable when the screen is too
+            // small. It also removes the `RenderFlex` exception while the front
+            // panel of the [Backdrop] is being opened and closed
+            return SingleChildScrollView(
+              child: converter,
+            );
+          } else {
+            // In landscape mode, center the converter with a fixed width
+            // so that it does not stretch out completely
+            return SingleChildScrollView(
+              child: Center(
+                child: Container(
+                  width: 450.0,
+                  child: converter,
+                ),
+              ),
+            );
+          }
+        },
+      )
     );
 
     return converterGroup;
