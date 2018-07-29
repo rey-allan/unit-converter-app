@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:unit_converter/model/category.dart';
@@ -12,8 +15,10 @@ import 'package:unit_converter/widgets/category_tile.dart';
 
 /// Category Screen
 ///
-/// This is the 'home' screen of the Unit Converter.
-/// It shows a header and a list of [Category].
+/// Loads in unit conversion data, and displays the data.
+/// This is the main screen to our app. It retrieves conversion data from a
+/// JSON asset and from an API. It displays the [Categories] in the back panel
+/// of a [Backdrop] widget and shows the [UnitConverter] in the front panel.
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen();
 
@@ -22,17 +27,6 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  static const _categoryNames = <String>[
-    'Length',
-    'Area',
-    'Volume',
-    'Mass',
-    'Time',
-    'Digital Storage',
-    'Energy',
-    'Currency',
-  ];
-
   static const _baseColors = <ColorSwatch>[
     ColorSwatch(0xFF6AB7A8, {
       'highlight': Color(0xFF6AB7A8),
@@ -74,6 +68,51 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // Keep track of a currently selected [Category]
   Category _currentCategory;
 
+  /// Retrieves a list of [Categories] and their [Unit]s
+  Future<void> _retrieveLocalCategories() async {
+    // Consider omitting the types for local variables
+    // See: https://www.dartlang.org/guides/language/effective-dart/usage
+    final json =
+        DefaultAssetBundle.of(context).loadString('assets/data/units.json');
+
+    final data = JsonDecoder().convert(await json);
+
+    if (data is! Map) {
+      throw ('Data retrieved from assets is not a Map');
+    }
+
+    int categoryIndex = 0;
+
+    // Create a [Category] with its list of [Unit]s from the JSON asset
+    data.keys.forEach((key){
+      final List<Unit> units = data[key]
+          .map<Unit>((dynamic unit) => Unit.fromJson(unit))
+          .toList();
+
+      // The state needs to be updated to make sure orientation changes work
+      // as well as the unit converter selection via the [Backdrop]
+      setState(() {
+        this._categories.add(
+            CategoryTile(
+              category: Category(
+                name: key,
+                color: _baseColors[categoryIndex],
+                units: units,
+                iconLocation: Icons.cake,
+              ),
+              onTapHandler: this._onCategoryTap,
+            )
+        );
+      });
+
+      categoryIndex++;
+    });
+
+    setState(() {
+      this._currentCategory = this._categories[0].category;
+    });
+  }
+
   /// Makes the correct number of rows for the categories, based on whether the
   /// device is portrait or landscape. For portrait, use a [ListView], and for
   /// landscape, a [GridView].
@@ -91,17 +130,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
   }
 
-  /// Generates a list of mock [Unit]s.
-  List<Unit> _generateUnits(String categoryName) {
-    return List.generate(10, (int i) {
-      i += 1;
-      return Unit(
-        name: '$categoryName Unit $i',
-        conversion: i.toDouble(),
-      );
-    });
-  }
-
   /// Function to call when a [Category] is tapped
   void _onCategoryTap(Category category) {
     setState(() {
@@ -109,31 +137,32 @@ class _CategoryScreenState extends State<CategoryScreen> {
     });
   }
 
+  // We use `didChangeDependencies()` so that we can wait for our JSON asset
+  // to be loaded in (async)
   @override
-  void initState() {
-    super.initState();
-
-    // Create the list of categories at initialization
-    for (int i = 0; i < _categoryNames.length; i++) {
-      _categories.add(
-          CategoryTile(
-            category: Category(
-              name: _categoryNames[i],
-              color: _baseColors[i],
-              units: this._generateUnits(_categoryNames[i]),
-              iconLocation: Icons.cake,
-            ),
-            onTapHandler: this._onCategoryTap,
-          )
-      );
+  Future<void> didChangeDependencies() async {
+    super.didChangeDependencies();
+    // We have static unit conversions located in our assets file
+    if (this._categories.isEmpty) {
+      await this._retrieveLocalCategories();
     }
-
-    // Set the default [Category] for the unit converter that opens
-    this._currentCategory = this._categories[0].category;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Since we are now loading our assets async, we need to make sure the
+    // list of categories is not built until all assets have been loaded
+    // so we can add a progress indicator while the async job finishes
+    if (this._categories.isEmpty) {
+      return Center(
+        child: Container(
+          height: 180.0,
+          width: 180.0,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final categoriesView = Padding(
       child: this._buildCategoryWidgets(MediaQuery.of(context).orientation),
       padding: EdgeInsets.only(

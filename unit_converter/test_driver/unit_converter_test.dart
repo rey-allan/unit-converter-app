@@ -42,25 +42,25 @@ void main() {
   });
 
   test('User can change the "From" conversion unit', () async {
-    await _selectCategory(driver, 'Area');
-    await _enterNumber(driver, 34.0);
+    await _selectCategory(driver, 'Time');
+    await _enterNumber(driver, 60.0);
 
     await driver.tap(find.byValueKey('driver-from-dropdown'));
-    await driver.tap(find.text('Area Unit 2'));
+    await driver.tap(find.text('Minute'));
 
-    // The conversion happens from 'Unit 2' to 'Unit 1', so the value is halved
-    await _validateOutputEquals(driver, '17');
+    // The conversion happens from 'Minutes' to 'Seconds': 60 min => 3600 sec
+    await _validateOutputEquals(driver, '3600');
   });
 
   test('User can change the "To" conversion unit', () async {
-    await _selectCategory(driver, 'Volume');
+    await _selectCategory(driver, 'Digital Storage');
     await _enterNumber(driver, 10.0);
 
     await driver.tap(find.byValueKey('driver-to-dropdown'));
-    await driver.tap(find.text('Volume Unit 3'));
+    await driver.tap(find.text('Kilobyte'));
 
-    // The conversion happens from 'Unit 1' to 'Unit 3', so the value is tripled
-    await _validateOutputEquals(driver, '30');
+    // The conversion happens from 'Megabyte' to 'Kilobyte': 10 MB => 10,000 KB
+    await _validateOutputEquals(driver, '10000');
   });
 }
 

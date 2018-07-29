@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:unit_converter/screens/category_screen.dart';
@@ -41,10 +42,18 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: _portrait,
-          child: CategoryScreen(),
+          // We need to wrap the [Widget] using a [DefaultAssetBundle] to be
+          // able to inject our test bundle
+          child: DefaultAssetBundle(
+            bundle: TestAssetBundle(),
+            child: CategoryScreen(),
+          ),
         )
       )
     );
+
+    // Wait for all async assets to be loaded
+    await tester.pumpAndSettle();
 
     expect(find.byType(Backdrop), findsOneWidget);
   });
@@ -55,10 +64,16 @@ void main() {
         MaterialApp(
           home: MediaQuery(
             data: _portrait,
-            child: CategoryScreen(),
+            child: DefaultAssetBundle(
+              bundle: TestAssetBundle(),
+              child: CategoryScreen(),
+            ),
           ),
         )
     );
+
+    // Wait for all async assets to be loaded
+    await tester.pumpAndSettle();
 
     expect(find.byType(ConverterScreen), findsOneWidget);
     // It should find two widgets with text 'Length': the category in the menu,
@@ -72,10 +87,16 @@ void main() {
         MaterialApp(
           home: MediaQuery(
             data: _portrait,
-            child: CategoryScreen(),
+            child: DefaultAssetBundle(
+              bundle: TestAssetBundle(),
+              child: CategoryScreen(),
+            ),
           ),
         )
     );
+
+    // Wait for all async assets to be loaded
+    await tester.pumpAndSettle();
 
     // Initially only one widget should exist in the category list
     expect(find.text('Time'), findsOneWidget);
@@ -101,10 +122,16 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: _portrait,
-          child: CategoryScreen(),
+          child: DefaultAssetBundle(
+            bundle: TestAssetBundle(),
+            child: CategoryScreen(),
+          ),
         ),
       )
     );
+
+    // Wait for all async assets to be loaded
+    await tester.pumpAndSettle();
 
     expect(find.byType(ListView), findsOneWidget);
   });
@@ -115,11 +142,42 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: _landscape,
-          child: CategoryScreen(),
+          child: DefaultAssetBundle(
+            bundle: TestAssetBundle(),
+            child: CategoryScreen(),
+          ),
         ),
       )
     );
 
+    // Wait for all async assets to be loaded
+    await tester.pumpAndSettle();
+
     expect(find.byType(GridView), findsOneWidget);
   });
+}
+
+/// A test class used to inject the assets bundle from where the units are
+/// loaded because the real assets are not available for unit tests.
+/// See: https://docs.flutter.io/flutter/widgets/DefaultAssetBundle-class.html
+class TestAssetBundle extends CachingAssetBundle {
+  @override
+  Future<String> loadString(String key, { bool cache: true }) async {
+    if (key == 'assets/data/units.json') {
+      return """
+        {
+          "Length": [{"name": "Unit 1", "conversion": 1.0}],
+          "Time": [{"name": "Unit 1", "conversion": 1.0}]
+        }
+      """;
+    }
+
+    return null;
+  }
+
+  @override
+  Future<ByteData> load(String key) {
+    // NoOp
+    return null;
+  }
 }
