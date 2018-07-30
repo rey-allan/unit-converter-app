@@ -17,7 +17,7 @@ void main() {
       home: Material(
         child: CategoryTile(
           category: Category(
-            iconLocation: Icons.computer,
+            iconLocation: 'assets/icon/length.png',
             color: ColorSwatch(Colors.blueAccent.value, {
               'highlight': Colors.blueAccent,
               'splash': Colors.blue,
@@ -30,7 +30,7 @@ void main() {
       ),
     ));
 
-    expect(find.byIcon(Icons.computer), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
     expect(find.byType(Text), findsOneWidget);
     expect(find.byType(InkWell), findsOneWidget);
 
@@ -49,7 +49,7 @@ void main() {
       home: Material(
         child: CategoryTile(
           category: Category(
-            iconLocation: Icons.computer,
+            iconLocation: 'assets/icon/length.png',
             color: ColorSwatch(Colors.blueAccent.value, {
               'highlight': Colors.blueAccent,
               'splash': Colors.blue,
@@ -75,7 +75,7 @@ void main() {
     final Category expectedCategory = Category(
       name: 'Degrees',
       units: units,
-      iconLocation: Icons.computer,
+      iconLocation: 'assets/icon/length.png',
       color: ColorSwatch(Colors.blueAccent.value, {
         'highlight': Colors.blueAccent,
         'splash': Colors.blue,

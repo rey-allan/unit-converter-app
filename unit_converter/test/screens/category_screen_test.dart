@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -176,8 +178,8 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<ByteData> load(String key) {
-    // NoOp
-    return null;
+  Future<ByteData> load(String key) async {
+    return new ByteData.view(new Uint8List.fromList(
+        new File('assets/icons/test_icon.png').readAsBytesSync()).buffer);
   }
 }

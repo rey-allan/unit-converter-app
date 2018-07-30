@@ -27,6 +27,17 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
+  static const _icons = {
+    'Length': 'assets/icons/length.png',
+    'Area': 'assets/icons/area.png',
+    'Volume': 'assets/icons/volume.png',
+    'Mass': 'assets/icons/mass.png',
+    'Time': 'assets/icons/time.png',
+    'Digital Storage': 'assets/icons/digital_storage.png',
+    'Energy': 'assets/icons/power.png',
+    'Currency': 'assets/icons/currency.png',
+  };
+
   static const _baseColors = <ColorSwatch>[
     ColorSwatch(0xFF6AB7A8, {
       'highlight': Color(0xFF6AB7A8),
@@ -98,7 +109,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 name: key,
                 color: _baseColors[categoryIndex],
                 units: units,
-                iconLocation: Icons.cake,
+                iconLocation: _icons[key],
               ),
               onTapHandler: this._onCategoryTap,
             )

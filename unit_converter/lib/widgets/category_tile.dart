@@ -50,9 +50,8 @@ class CategoryTile extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Icon(
+                  child: Image.asset(
                     this.category.iconLocation,
-                    size: 60.0,
                   ),
                 ),
                 Text(
