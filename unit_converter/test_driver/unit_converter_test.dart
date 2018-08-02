@@ -62,6 +62,34 @@ void main() {
     // The conversion happens from 'Megabyte' to 'Kilobyte': 10 MB => 10,000 KB
     await _validateOutputEquals(driver, '10000');
   });
+
+  test('User can convert currencies with live rates', () async {
+    // Make sure to close the front panel
+    await driver.tap(find.byType("IconButton"));
+
+    // Currency will be the last category so we need to scroll down to find it!
+    await driver.scrollUntilVisible(
+        find.byType('ListView'),
+        find.text('Currency'),
+        dyScroll: -300.0
+    );
+
+    await driver.tap(find.text('Currency'));
+
+    // Scrolling inside a [Dropdown] seems almost impossible, so we will use
+    // two random currencies that are almost at the bottom since when tapping
+    // the dropdown the list scrolls automatically to the end
+    await driver.tap(find.byValueKey('driver-from-dropdown'));
+    await driver.tap(find.text('XAF'));
+
+    await driver.tap(find.byValueKey('driver-to-dropdown'));
+    await driver.tap(find.text('XOF'));
+
+    await _enterNumber(driver, 10.0);
+
+    // Since the conversion uses live rates we can only check the number changed
+    await _validateOutputChanged(driver, '10');
+  });
 }
 
 Future<Null> _selectCategory(FlutterDriver driver, String category) async {
@@ -80,9 +108,15 @@ Future<Null> _enterNumber(FlutterDriver driver, double number) async {
 }
 
 Future<Null> _validateOutputEquals(FlutterDriver driver, String output) async {
-  final String converted = await driver.getText(
-      find.byValueKey('driver-numeric-output')
-  );
+  final String converted =
+      await driver.getText(find.byValueKey('driver-numeric-output'));
 
   expect(converted, equals(output));
+}
+
+Future<Null> _validateOutputChanged(FlutterDriver driver, String input) async {
+  final String converted =
+      await driver.getText(find.byValueKey('driver-numeric-output'));
+
+  expect(converted, isNot(equals(input)));
 }

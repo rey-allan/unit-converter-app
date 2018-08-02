@@ -5,7 +5,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:unit_converter/infrastructure/currency_provider_impl.dart';
+import 'package:unit_converter/model/currency_provider.dart';
 import 'package:unit_converter/screens/category_screen.dart';
 import 'package:unit_converter/screens/converter_screen.dart';
 import 'package:unit_converter/widgets/backdrop.dart';
@@ -31,12 +34,20 @@ void main() {
       .fromWindow(ui.window)
       .copyWith(size: Size(1980.0, 1200.0));
 
+  CurrencyProvider currencyProvider;
+
   setUp(() {
     // Also the initial size of the device needs to be setup!
     // See: https://github.com/flutter/flutter/issues/12994#issuecomment-397321431
     WidgetsBinding.instance.renderView.configuration = TestViewConfiguration(
         size: const Size(1200.0, 1980.0)
     );
+
+    final json = '{"results":{"USD":{"name":"USD"}, "MXN":{"name":"MXN"}}}';
+    final httpClient =
+        MockClient((request) => Future.value(http.Response(json, 200)));
+
+    currencyProvider = CurrencyProviderImpl(httpClient: httpClient);
   });
 
   testWidgets('Screen displays a Backdrop', (WidgetTester tester) async {
@@ -48,7 +59,7 @@ void main() {
           // able to inject our test bundle
           child: DefaultAssetBundle(
             bundle: TestAssetBundle(),
-            child: CategoryScreen(),
+            child: CategoryScreen(currencyProvider: currencyProvider),
           ),
         )
       )
@@ -68,7 +79,7 @@ void main() {
             data: _portrait,
             child: DefaultAssetBundle(
               bundle: TestAssetBundle(),
-              child: CategoryScreen(),
+              child: CategoryScreen(currencyProvider: currencyProvider),
             ),
           ),
         )
@@ -91,7 +102,7 @@ void main() {
             data: _portrait,
             child: DefaultAssetBundle(
               bundle: TestAssetBundle(),
-              child: CategoryScreen(),
+              child: CategoryScreen(currencyProvider: currencyProvider),
             ),
           ),
         )
@@ -126,7 +137,7 @@ void main() {
           data: _portrait,
           child: DefaultAssetBundle(
             bundle: TestAssetBundle(),
-            child: CategoryScreen(),
+            child: CategoryScreen(currencyProvider: currencyProvider),
           ),
         ),
       )
@@ -146,7 +157,7 @@ void main() {
           data: _landscape,
           child: DefaultAssetBundle(
             bundle: TestAssetBundle(),
-            child: CategoryScreen(),
+            child: CategoryScreen(currencyProvider: currencyProvider),
           ),
         ),
       )
@@ -156,6 +167,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(GridView), findsOneWidget);
+  });
+
+  testWidgets('Currency is not shown on error', (WidgetTester tester) async {
+    final faultyHttpClient =
+        MockClient((request) => Future.value(http.Response('{}', 501)));
+
+    currencyProvider = CurrencyProviderImpl(httpClient: faultyHttpClient);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: _portrait,
+          child: DefaultAssetBundle(
+            bundle: TestAssetBundle(),
+            child: CategoryScreen(currencyProvider: currencyProvider),
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('Currency'), findsNothing);
   });
 }
 

@@ -5,7 +5,7 @@ import 'package:unit_converter/model/unit.dart';
 
 class Dropdown extends StatefulWidget {
   final List<Unit> units;
-  final ValueChanged<double> onChangeHandler;
+  final ValueChanged<Unit> onChangeHandler;
 
   const Dropdown({
     Key key,
@@ -29,7 +29,7 @@ class _DropdownState extends State<Dropdown> {
     for (Unit unit in widget.units) {
       items.add(
           DropdownMenuItem(
-              value: unit.conversion.toString(),
+              value: unit.name,
               child: Container(
                 child: Text(
                   unit.name,
@@ -45,7 +45,7 @@ class _DropdownState extends State<Dropdown> {
 
   void _setDefaultState() {
     setState(() {
-      this._selectedValue = widget.units[0].conversion.toString();
+      this._selectedValue = widget.units[0].name;
     });
   }
 
@@ -54,13 +54,8 @@ class _DropdownState extends State<Dropdown> {
       this._selectedValue = value;
     });
 
-    try {
-      final double valueAsDouble = double.parse(value);
-      widget.onChangeHandler(valueAsDouble);
-    } on Exception {
-      print('Cannot convert conversion value "$value" to double, '
-          'unit misconfigured?');
-    }
+    final Unit selected = widget.units.firstWhere((unit) => unit.name == value);
+    widget.onChangeHandler(selected);
   }
 
   @override

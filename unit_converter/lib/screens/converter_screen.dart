@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-
 import 'package:unit_converter/model/category.dart';
+import 'package:unit_converter/model/currency_provider.dart';
+import 'package:unit_converter/model/unit.dart';
 import 'package:unit_converter/widgets/converter/dropdown.dart';
 import 'package:unit_converter/widgets/converter/numeric_input.dart';
 import 'package:unit_converter/widgets/converter/numeric_output.dart';
@@ -13,10 +16,12 @@ import 'package:unit_converter/widgets/converter/numeric_output.dart';
 /// Converter screen where users can input amounts to convert.
 class ConverterScreen extends StatefulWidget {
   final Category category;
+  final CurrencyProvider currencyProvider;
 
   /// This [ConverterScreen] requires [Category] to not be null.
   const ConverterScreen({
     @required this.category,
+    this.currencyProvider,
   }) : assert(category != null);
 
   @override
@@ -31,26 +36,36 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
   double _inputValue;
   double _outputValue;
-  double _toConversion;
-  double _fromConversion;
+  Unit _to;
+  Unit _from;
 
   void _setDefaults() {
     // Update the conversions, and trigger the computation of the output value
     setState(() {
-      this._fromConversion = widget.category.units[0].conversion;
-      this._toConversion = widget.category.units[0].conversion;
+      this._from = widget.category.units[0];
+      this._to = widget.category.units[0];
       this._updateConversion();
     });
   }
 
-  void _updateConversion() {
+  Future<void> _updateConversion() async {
     if (null == this._inputValue) {
       return;
     }
 
+    double converted;
+
+    // For the Currency [Category] use an external provider for the conversion
+    if (widget.category.name == 'Currency') {
+      converted = await widget.currencyProvider.convert(
+          this._from, this._to, this._inputValue);
+    } else {
+      converted =
+          this._inputValue * (this._to.conversion / this._from.conversion);
+    }
+
     setState(() {
-      this._outputValue =
-          this._inputValue * (this._toConversion / this._fromConversion);
+      this._outputValue = converted;
     });
   }
 
@@ -61,16 +76,16 @@ class _ConverterScreenState extends State<ConverterScreen> {
     });
   }
 
-  void _handleOnFromConversionValueChange(double fromConversion) {
+  void _handleOnFromConversionValueChange(Unit from) {
     setState(() {
-      this._fromConversion = fromConversion;
+      this._from = from;
       this._updateConversion();
     });
   }
 
-  void _handleOnToConversionValueChange(double toConversion) {
+  void _handleOnToConversionValueChange(Unit to) {
     setState(() {
-      this._toConversion = toConversion;
+      this._to = to;
       this._updateConversion();
     });
   }
@@ -101,8 +116,8 @@ class _ConverterScreenState extends State<ConverterScreen> {
           Dropdown(
             key: Key('driver-from-dropdown'),
             units: widget.category.units,
-            onChangeHandler: (value) =>
-                this._handleOnFromConversionValueChange(value),
+            onChangeHandler: (unit) =>
+                this._handleOnFromConversionValueChange(unit),
           ),
         ]
     );
@@ -122,8 +137,8 @@ class _ConverterScreenState extends State<ConverterScreen> {
           Dropdown(
             key: Key('driver-to-dropdown'),
             units: widget.category.units,
-            onChangeHandler: (value) =>
-                this._handleOnToConversionValueChange(value),
+            onChangeHandler: (unit) =>
+                this._handleOnToConversionValueChange(unit),
           ),
         ]
     );

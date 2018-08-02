@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-
 import 'package:unit_converter/model/category.dart';
+import 'package:unit_converter/model/currency_provider.dart';
 import 'package:unit_converter/model/unit.dart';
 import 'package:unit_converter/screens/converter_screen.dart';
 import 'package:unit_converter/widgets/backdrop.dart';
@@ -20,7 +20,9 @@ import 'package:unit_converter/widgets/category_tile.dart';
 /// JSON asset and from an API. It displays the [Categories] in the back panel
 /// of a [Backdrop] widget and shows the [UnitConverter] in the front panel.
 class CategoryScreen extends StatefulWidget {
-  const CategoryScreen();
+  final CurrencyProvider currencyProvider;
+
+  const CategoryScreen({this.currencyProvider});
 
   @override
   State<StatefulWidget> createState() => _CategoryScreenState();
@@ -78,8 +80,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   // Keep track of a currently selected [Category]
   Category _currentCategory;
+  bool _isLoading = true;
 
-  /// Retrieves a list of [Categories] and their [Unit]s
+  /// Retrieves a list of [Categories] and their [Unit]s from a local file
   Future<void> _retrieveLocalCategories() async {
     // Consider omitting the types for local variables
     // See: https://www.dartlang.org/guides/language/effective-dart/usage
@@ -95,16 +98,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
     int categoryIndex = 0;
 
     // Create a [Category] with its list of [Unit]s from the JSON asset
-    data.keys.forEach((key){
-      final List<Unit> units = data[key]
-          .map<Unit>((dynamic unit) => Unit.fromJson(unit))
-          .toList();
+    data.keys.forEach((key) {
+      final List<Unit> units =
+          data[key].map<Unit>((dynamic unit) => Unit.fromJson(unit)).toList();
 
       // The state needs to be updated to make sure orientation changes work
       // as well as the unit converter selection via the [Backdrop]
       setState(() {
-        this._categories.add(
-            CategoryTile(
+        this._categories.add(CategoryTile(
               category: Category(
                 name: key,
                 color: _baseColors[categoryIndex],
@@ -112,8 +113,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 iconLocation: _icons[key],
               ),
               onTapHandler: this._onCategoryTap,
-            )
-        );
+            ));
       });
 
       categoryIndex++;
@@ -122,6 +122,30 @@ class _CategoryScreenState extends State<CategoryScreen> {
     setState(() {
       this._currentCategory = this._categories[0].category;
     });
+  }
+
+  /// Retrieves the units for the Currency [Category] from an external provider
+  Future<void> _retrieveCurrencyCategory() async {
+    try {
+      final units = await widget.currencyProvider.getUnits();
+
+      setState(() {
+        this._categories.add(
+            CategoryTile(
+              category: Category(
+                name: 'Currency',
+                color: _baseColors.last,
+                units: units,
+                iconLocation: _icons['Currency'],
+              ),
+              onTapHandler: this._onCategoryTap,
+            )
+        );
+      });
+    } catch (e) {
+      // TODO: Improve error handling
+      print('Caught an exception while retrieving Currency units: $e');
+    }
   }
 
   /// Makes the correct number of rows for the categories, based on whether the
@@ -153,9 +177,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    // We have static unit conversions located in our assets file
+    // We have static unit conversions located in our assets file and we want to
+    // also obtain uo-to-date currency conversions from an external provider
     if (this._categories.isEmpty) {
       await this._retrieveLocalCategories();
+      await this._retrieveCurrencyCategory();
+
+      setState(() {
+        this._isLoading = false;
+      });
     }
   }
 
@@ -164,7 +194,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     // Since we are now loading our assets async, we need to make sure the
     // list of categories is not built until all assets have been loaded
     // so we can add a progress indicator while the async job finishes
-    if (this._categories.isEmpty) {
+    if (this._isLoading) {
       return Center(
         child: Container(
           height: 180.0,
@@ -187,7 +217,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     return Backdrop(
       currentCategory: this._currentCategory,
-      frontPanel: ConverterScreen(category: this._currentCategory),
+      frontPanel: ConverterScreen(
+        category: this._currentCategory,
+        currencyProvider: widget.currencyProvider,
+      ),
       backPanel: categoriesView,
       frontTitle: Text('Unit Converter'),
       backTitle: Text('Select a Category'),

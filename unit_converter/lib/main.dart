@@ -4,6 +4,7 @@
 
 // You can read about packages here: https://flutter.io/using-packages/
 import 'package:flutter/material.dart';
+import 'package:unit_converter/infrastructure/currency_provider_impl.dart';
 
 // You can use a relative import, i.e. `import 'category.dart;'` or
 // a package import, as shown below.
@@ -34,7 +35,11 @@ class UnitConverterApp extends StatelessWidget {
         textSelectionHandleColor: Colors.green[500],
       ),
       title: 'Unit Converter',
-      home: CategoryScreen(),
+      home: CategoryScreen(
+        // I wish Flutter had a DI framework for this
+        // See: https://flutter.io/faq/#does-flutter-come-with-a-dependency-injection-framework-or-solution
+        currencyProvider: CurrencyProviderImpl(),
+      ),
     );
   }
 }

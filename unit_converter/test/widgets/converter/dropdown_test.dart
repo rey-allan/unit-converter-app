@@ -14,7 +14,7 @@ void main() {
                 Unit(name: 'Celsius', conversion: 1.0),
                 Unit(name: 'Fahrenheit', conversion: 2.0),
               ],
-              onChangeHandler: (value) => print('Value: $value'),
+              onChangeHandler: (unit) => print('Unit: ${unit.name}'),
             ),
           ),
         )
@@ -25,7 +25,7 @@ void main() {
   });
 
   testWidgets('Handler is called on selecting', (WidgetTester tester) async {
-    double receivedValue = 0.0;
+    Unit receivedUnit;
 
     await tester.pumpWidget(
         MaterialApp(
@@ -35,13 +35,13 @@ void main() {
                 Unit(name: 'Celsius', conversion: 1.0),
                 Unit(name: 'Fahrenheit', conversion: 2.0),
               ],
-              onChangeHandler: (value) => receivedValue = value,
+              onChangeHandler: (unit) => receivedUnit = unit,
             ),
           ),
         )
     );
 
-    expect(receivedValue, equals(0.0));
+    expect(receivedUnit, isNull);
 
     // Tap the dropdown to open the menu
     await tester.tap(find.byType(DropdownButton));
@@ -50,6 +50,7 @@ void main() {
     await tester.tap(find.text('Celsius').last);
     await tester.pump();
 
-    expect(receivedValue, equals(1.0));
+    expect(receivedUnit.name, equals('Celsius'));
+    expect(receivedUnit.conversion, equals(1.0));
   });
 }

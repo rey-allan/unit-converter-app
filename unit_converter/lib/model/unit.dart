@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 
 /// Information about a [Unit].
-class Unit {
+class Unit implements Comparable<Unit>{
   final String name;
   final double conversion;
 
@@ -17,6 +17,11 @@ class Unit {
     @required this.conversion,
   })  : assert(name != null),
         assert(conversion != null);
+
+  @override
+  int compareTo(Unit other) {
+    return this.name.compareTo(other.name);
+  }
 
   /// Creates a [Unit] from a JSON object.
   Unit.fromJson(Map jsonMap)

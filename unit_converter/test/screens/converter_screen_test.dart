@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:unit_converter/infrastructure/currency_provider_impl.dart';
 import 'package:unit_converter/model/category.dart';
 import 'package:unit_converter/model/unit.dart';
 import 'package:unit_converter/screens/converter_screen.dart';
@@ -10,9 +12,9 @@ import 'package:unit_converter/widgets/converter/numeric_output.dart';
 
 void main() {
   final List<Unit> units = <Unit>[
-    Unit(name: 'Unit 1', conversion: 1.0),
-    Unit(name: 'Unit 2', conversion: 2.0),
-    Unit(name: 'Unit 3', conversion: 3.0),
+    Unit(name: 'Unit1', conversion: 1.0),
+    Unit(name: 'Unit2', conversion: 2.0),
+    Unit(name: 'Unit3', conversion: 3.0),
   ];
 
   testWidgets('Screen displays an input/output group with arrows',
@@ -88,7 +90,9 @@ void main() {
     await tester.tap(find.byType(Dropdown).first);
     await tester.pump();
     // Change to 'Unit 2' option
-    await tester.tap(find.text('Unit 2').last);
+    await tester.tap(find
+        .text('Unit2')
+        .last);
     await tester.pump();
 
     output = tester.widget(find.byType(NumericOutput));
@@ -122,11 +126,47 @@ void main() {
     await tester.tap(find.byType(Dropdown).last);
     await tester.pump();
     // Change to 'Unit 3' option
-    await tester.tap(find.text('Unit 3').last);
+    await tester.tap(find
+        .text('Unit3')
+        .last);
     await tester.pump();
 
     output = tester.widget(find.byType(NumericOutput));
     // The conversion happens from 'Unit 1' to 'Unit 3', so the value is tripled
     expect(output.value, equals(72.0));
+  });
+
+  testWidgets('For Currency an external provider is used',
+      (WidgetTester tester) async {
+    // Default conversion
+    final json = '{"Unit1_Unit1":100.0}';
+    final httpClient =
+    MockClient((request) => Future.value(http.Response(json, 200)));
+
+    final currencyProvider = CurrencyProviderImpl(httpClient: httpClient);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ConverterScreen(
+          category: Category(
+              name: 'Currency',
+              color: Colors.blueAccent,
+              units: units,
+              iconLocation: 'assets/icon/length.png'
+          ),
+          currencyProvider: currencyProvider,
+        ),
+      ),
+    ));
+
+    NumericOutput output = tester.widget(find.byType(NumericOutput));
+    expect(output.value, isNull);
+
+    await tester.enterText(find.byType(NumericInput), '24');
+    await tester.pump();
+
+    output = tester.widget(find.byType(NumericOutput));
+    // The conversion happens using the rate from the external provider, 100.0
+    expect(output.value, equals(2400));
   });
 }
