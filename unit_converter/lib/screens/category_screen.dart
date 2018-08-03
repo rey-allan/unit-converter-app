@@ -126,26 +126,30 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   /// Retrieves the units for the Currency [Category] from an external provider
   Future<void> _retrieveCurrencyCategory() async {
-    try {
-      final units = await widget.currencyProvider.getUnits();
+    bool shouldBeDisabled = false;
+    List<Unit> units = [];
 
-      setState(() {
-        this._categories.add(
-            CategoryTile(
-              category: Category(
-                name: 'Currency',
-                color: _baseColors.last,
-                units: units,
-                iconLocation: _icons['Currency'],
-              ),
-              onTapHandler: this._onCategoryTap,
-            )
-        );
-      });
+    try {
+      units = await widget.currencyProvider.getUnits();
     } catch (e) {
-      // TODO: Improve error handling
       print('Caught an exception while retrieving Currency units: $e');
+      shouldBeDisabled = true;
     }
+
+    setState(() {
+      this._categories.add(
+          CategoryTile(
+            category: Category(
+              name: 'Currency',
+              color: _baseColors.last,
+              units: units,
+              iconLocation: _icons['Currency'],
+            ),
+            onTapHandler: this._onCategoryTap,
+            disabled: shouldBeDisabled,
+          )
+      );
+    });
   }
 
   /// Makes the correct number of rows for the categories, based on whether the

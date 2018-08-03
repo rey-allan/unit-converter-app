@@ -9,6 +9,7 @@ import 'package:unit_converter/screens/converter_screen.dart';
 import 'package:unit_converter/widgets/converter/dropdown.dart';
 import 'package:unit_converter/widgets/converter/numeric_input.dart';
 import 'package:unit_converter/widgets/converter/numeric_output.dart';
+import 'package:unit_converter/widgets/error_banner.dart';
 
 void main() {
   final List<Unit> units = <Unit>[
@@ -141,7 +142,7 @@ void main() {
     // Default conversion
     final json = '{"Unit1_Unit1":100.0}';
     final httpClient =
-    MockClient((request) => Future.value(http.Response(json, 200)));
+        MockClient((request) => Future.value(http.Response(json, 200)));
 
     final currencyProvider = CurrencyProviderImpl(httpClient: httpClient);
 
@@ -152,7 +153,7 @@ void main() {
               name: 'Currency',
               color: Colors.blueAccent,
               units: units,
-              iconLocation: 'assets/icon/length.png'
+              iconLocation: 'assets/icon/currency.png',
           ),
           currencyProvider: currencyProvider,
         ),
@@ -168,5 +169,33 @@ void main() {
     output = tester.widget(find.byType(NumericOutput));
     // The conversion happens using the rate from the external provider, 100.0
     expect(output.value, equals(2400));
+  });
+
+  testWidgets('Error banner is displayed when currency conversion fails',
+      (WidgetTester tester) async {
+    // A faulty response
+    final httpClient =
+        MockClient((request) => Future.value(http.Response('{}', 501)));
+
+    final currencyProvider = CurrencyProviderImpl(httpClient: httpClient);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ConverterScreen(
+          category: Category(
+            name: 'Currency',
+            color: Colors.blueAccent,
+            units: units,
+            iconLocation: 'assets/icon/currency.png',
+          ),
+          currencyProvider: currencyProvider,
+        ),
+      ),
+    ));
+
+    await tester.enterText(find.byType(NumericInput), '24');
+    await tester.pump();
+
+    expect(find.byType(ErrorBanner), findsOneWidget);
   });
 }

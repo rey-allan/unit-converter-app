@@ -16,6 +16,7 @@ import 'package:unit_converter/model/category.dart';
 class CategoryTile extends StatelessWidget {
   final Category category;
   final ValueChanged<Category> onTapHandler;
+  final bool disabled;
 
   /// Creates a [CategoryTile].
   ///
@@ -23,7 +24,8 @@ class CategoryTile extends StatelessWidget {
   /// color for the UI, and the icon that represents it (e.g. a ruler).
   const CategoryTile({
     @required this.category,
-    @required this.onTapHandler
+    @required this.onTapHandler,
+    this.disabled = false,
   }) : assert(category != null),
        assert(onTapHandler != null);
 
@@ -42,7 +44,8 @@ class CategoryTile extends StatelessWidget {
         highlightColor: this.category.color['highlight'],
         splashColor: this.category.color['splash'],
         borderRadius: BorderRadius.all(Radius.circular(50.0)),
-        onTap: () => this.onTapHandler(this.category),
+        // Make this [CategoryTile] not tap-able when disabled
+        onTap: this.disabled ? null : () => this.onTapHandler(this.category),
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(8.0),
@@ -56,7 +59,11 @@ class CategoryTile extends StatelessWidget {
                 ),
                 Text(
                   this.category.name,
-                  style: TextStyle(fontSize: 24.0),
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    // Make this [CategoryTile] look disabled by greying it out
+                    color: this.disabled ? Colors.grey[600] : Colors.black,
+                  ),
                 ),
               ],
             ),

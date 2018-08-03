@@ -49,7 +49,7 @@ void main() {
       home: Material(
         child: CategoryTile(
           category: Category(
-            iconLocation: 'assets/icon/length.png',
+            iconLocation: 'assets/icon/degrees.png',
             color: ColorSwatch(Colors.blueAccent.value, {
               'highlight': Colors.blueAccent,
               'splash': Colors.blue,
@@ -75,7 +75,7 @@ void main() {
     final Category expectedCategory = Category(
       name: 'Degrees',
       units: units,
-      iconLocation: 'assets/icon/length.png',
+      iconLocation: 'assets/icon/degrees.png',
       color: ColorSwatch(Colors.blueAccent.value, {
         'highlight': Colors.blueAccent,
         'splash': Colors.blue,
@@ -85,17 +85,50 @@ void main() {
     Category receivedCategory;
     
     await tester.pumpWidget(MaterialApp(
-        home: Material(
-            child: CategoryTile(
-              category: expectedCategory,
-              onTapHandler: (category) => receivedCategory = category,
-            )
-        )
+      home: Material(
+        child: CategoryTile(
+          category: expectedCategory,
+          onTapHandler: (category) => receivedCategory = category,
+        ),
+      ),
     ));
     
     await tester.tap(find.byType(InkWell));
     await tester.pump();
 
     expect(receivedCategory, equals(expectedCategory));
+  });
+
+  testWidgets('Widget is greyed out and not tap-able when disabled',
+      (WidgetTester tester) async {
+    Category receivedCategory;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: CategoryTile(
+          category: Category(
+            name: 'Currency',
+            units: units,
+            iconLocation: 'assets/icon/currency.png',
+            color: ColorSwatch(Colors.blueAccent.value, {
+              'highlight': Colors.blueAccent,
+              'splash': Colors.blue,
+            }),
+          ),
+          onTapHandler: (category) => receivedCategory = category,
+          disabled: true,
+        )
+      ),
+    ));
+
+    // Text should be greyed out
+    final Text text = tester.widget(find.byType(Text));
+    expect(text.style.color, equals(Colors.grey[600]));
+
+    // Tapping should be disabled
+    await tester.tap(find.byType(InkWell));
+    await tester.pump();
+
+    expect(receivedCategory, isNull);
   });
 }

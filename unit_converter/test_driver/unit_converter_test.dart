@@ -10,6 +10,11 @@ import 'package:test/test.dart';
 // See: https://github.com/flutter/flutter/issues/6380
 // See: https://github.com/flutter/flutter/issues/6381
 
+// There is currently no way of enabling/disabling Internet connection of the
+// device programmatically, so no driver tests can be created to test the
+// error handling.
+// See: https://github.com/flutter/flutter/issues/15231
+
 void main() {
   FlutterDriver driver;
 

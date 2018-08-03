@@ -169,7 +169,7 @@ void main() {
     expect(find.byType(GridView), findsOneWidget);
   });
 
-  testWidgets('Currency is not shown on error', (WidgetTester tester) async {
+  testWidgets('Currency is disabled on error', (WidgetTester tester) async {
     final faultyHttpClient =
         MockClient((request) => Future.value(http.Response('{}', 501)));
 
@@ -187,7 +187,19 @@ void main() {
       )
     );
 
-    expect(find.text('Currency'), findsNothing);
+    // Wait for all async assets to be loaded
+    await tester.pumpAndSettle();
+
+    // The Currency category is still added
+    expect(find.text('Currency'), findsOneWidget);
+
+    await tester.tap(find.text('Currency'));
+    await tester.pumpAndSettle();
+
+    // But it can't be tapped so the [ConverterScreen] should not have changed
+    // to display the Currency category, i.e. there should still be only one
+    // text widget with 'Currency'
+    expect(find.text('Currency'), findsOneWidget);
   });
 }
 

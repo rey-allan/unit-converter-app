@@ -12,6 +12,7 @@ import 'package:unit_converter/model/unit.dart';
 import 'package:unit_converter/widgets/converter/dropdown.dart';
 import 'package:unit_converter/widgets/converter/numeric_input.dart';
 import 'package:unit_converter/widgets/converter/numeric_output.dart';
+import 'package:unit_converter/widgets/error_banner.dart';
 
 /// Converter screen where users can input amounts to convert.
 class ConverterScreen extends StatefulWidget {
@@ -38,6 +39,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
   double _outputValue;
   Unit _to;
   Unit _from;
+  bool _showError;
 
   void _setDefaults() {
     // Update the conversions, and trigger the computation of the output value
@@ -45,6 +47,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
       this._from = widget.category.units[0];
       this._to = widget.category.units[0];
       this._updateConversion();
+      this._showError = false;
     });
   }
 
@@ -54,11 +57,16 @@ class _ConverterScreenState extends State<ConverterScreen> {
     }
 
     double converted;
+    bool inErrorState = false;
 
     // For the Currency [Category] use an external provider for the conversion
     if (widget.category.name == 'Currency') {
-      converted = await widget.currencyProvider.convert(
-          this._from, this._to, this._inputValue);
+      try {
+        converted = await widget.currencyProvider
+            .convert(this._from, this._to, this._inputValue);
+      } catch (e) {
+        inErrorState = true;
+      }
     } else {
       converted =
           this._inputValue * (this._to.conversion / this._from.conversion);
@@ -66,6 +74,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
     setState(() {
       this._outputValue = converted;
+      this._showError = inErrorState;
     });
   }
 
@@ -92,12 +101,12 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
   Widget _buildVerticallyCenteredGroup(List<Widget> components) {
     return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: components,
-      )
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: components,
+        )
     );
   }
 
@@ -162,6 +171,10 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (this._showError) {
+      return ErrorBanner();
+    }
+
     final Widget inputGroup = this._buildInputGroup();
     final Widget outputGroup = this._buildOutputGroup();
     final Widget conversionArrows = RotatedBox(
@@ -174,39 +187,35 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
     final Widget converter = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        inputGroup,
-        conversionArrows,
-        outputGroup
-      ],
+      children: <Widget>[inputGroup, conversionArrows, outputGroup],
     );
 
     final Widget converterGroup = Padding(
-      padding: EdgeInsets.all(16.0),
-      child: OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
-          if (orientation == Orientation.portrait) {
-            // Use a `SingleChildScrollView` to ensure the converter is
-            // viewable on all screens and is scrollable when the screen is too
-            // small. It also removes the `RenderFlex` exception while the front
-            // panel of the [Backdrop] is being opened and closed
-            return SingleChildScrollView(
-              child: converter,
-            );
-          } else {
-            // In landscape mode, center the converter with a fixed width
-            // so that it does not stretch out completely
-            return SingleChildScrollView(
-              child: Center(
-                child: Container(
-                  width: 450.0,
-                  child: converter,
+        padding: EdgeInsets.all(16.0),
+        child: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) {
+            if (orientation == Orientation.portrait) {
+              // Use a `SingleChildScrollView` to ensure the converter is
+              // viewable on all screens and is scrollable when the screen is
+              // too small. It also removes the `RenderFlex` exception while the
+              // front panel of the [Backdrop] is being opened and closed
+              return SingleChildScrollView(
+                child: converter,
+              );
+            } else {
+              // In landscape mode, center the converter with a fixed width
+              // so that it does not stretch out completely
+              return SingleChildScrollView(
+                child: Center(
+                  child: Container(
+                    width: 450.0,
+                    child: converter,
+                  ),
                 ),
-              ),
-            );
-          }
-        },
-      )
+              );
+            }
+          },
+        )
     );
 
     return converterGroup;
