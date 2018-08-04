@@ -1,5 +1,4 @@
 # Unit Converter App
-:straight_ruler: A unit converter app made with Flutter.
 
 [![Build Status](https://travis-ci.org/rey-allan/unit-converter-app.svg?branch=master)](https://travis-ci.org/rey-allan/unit-converter-app)
 
