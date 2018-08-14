@@ -1,6 +1,7 @@
 # Unit Converter App
 
 [![Build Status](https://travis-ci.org/rey-allan/unit-converter-app.svg?branch=master)](https://travis-ci.org/rey-allan/unit-converter-app)
+[![Coverage Status](https://coveralls.io/repos/github/rey-allan/unit-converter-app/badge.svg?branch=master)](https://coveralls.io/github/rey-allan/unit-converter-app?branch=master)
 
 This repository contains a complete working implementation of a unit converter app created as part of Udacity's [Build Native Mobile Apps with Flutter](https://www.udacity.com/course/build-native-mobile-apps-with-flutter--ud905) course. It was extended to include the following:
 
