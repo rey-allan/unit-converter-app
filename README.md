@@ -10,6 +10,7 @@ This repository contains a complete working implementation of a unit converter a
 * Unit and Widget testing.
 * Driver tests (i.e. integration tests).
 * Integration with Travis for Continuous Integration except driver tests which cannot be executed without an emulator.
+* Integration with Coveralls for code coverage analysis.
 * A custom app name and launcher icon.
 * APK signing, minification and obfuscation for Android.
 
